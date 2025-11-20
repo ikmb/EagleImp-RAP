@@ -237,8 +237,8 @@ main() {
     # strip file path from downloaded file as it is located directly in the home folder now
     genmap="${genmap##*/}"
 
-    # take 7/8 of the available RAM for imputation chunks (and convert to GiB)
-    mem="$(( $mem * 7 / 8388608 ))"
+    # take 85% of the available RAM for imputation chunks (and convert to GiB)
+    mem="$(( $mem * 85 / 100 / 1024 / 1024 ))"
 
     # start timestamp for file processing
     procstart=$(date +%s)
