@@ -1,0 +1,125 @@
+{
+  "name": "ikmb-eagleimp",
+  "title": "IKMB-EagleImp",
+  "summary": "EagleImp genotype imputation on the UKB RAP (dnanexus).",
+  "dxapi": "1.0.0",
+  "version": "0.2.0",
+  "inputSpec": [
+    {
+      "name": "target",
+      "class": "file",
+      "optional": false,
+      "patterns": [
+        "*.vcf.gz", "*.bcf"
+      ],
+      "help": "The target file to be imputed. The output file format will be the same as the input."
+    },
+    {
+      "name": "reference",
+      "class": "string",
+      "optional": false,
+      "choices": [ "UKBcomplete", "UKBmaf", "1000G" ],
+      "help": "UKBcomplete: complete panel with variants with at least MAC=4; UKBmaf: complete panel filtered by MAF=0.0001; 1000G: 1000 Genomes reference panel."
+    },
+    {
+      "name": "build",
+      "class": "string",
+      "optional": false,
+      "choices": [ "hg19", "hg38" ],
+      "help": "The genome build of the target file. Used to select the correct reference as imputation can only be conducted with target and reference in the same genome build."
+    },
+    {
+      "name": "allowRefAltSwap",
+      "class": "boolean",
+      "optional": true,
+      "default": true,
+      "help": "Allow target and reference variants to match if their reference and alternative alleles are swapped."
+    },
+    {
+      "name": "allowStrandFlip",
+      "class": "boolean",
+      "optional": true,
+      "default": false,
+      "help": "Allow target and reference variants to match if their reference and alternative alleles are strand flipped."
+    },
+    {
+      "name": "imputeR2filter",
+      "class": "float",
+      "optional": true,
+      "default": 0.0,
+      "help": "Output contains only variants with an estimated R2 greater or equal to this filter value."
+    },
+    {
+      "name": "imputeMAFfilter",
+      "class": "float",
+      "optional": true,
+      "default": 0.0,
+      "help": "Output contains only variants with a minor allele frequency greater or equal to this filter value."
+    },
+    {
+      "name": "imputeInfo",
+      "class": "string",
+      "optional": true,
+      "choices": [ "a", "g", "p", "ag", "ap", "gp", "agp" ],
+      "default": "a",
+      "help": "Choose which probability information should accompany the hard called genotypes in the output:\na: allele dosages\ng: genotype dosages\np: genotype probabilities\nCan be arbitrarily combined."
+    },
+    {
+      "name": "K",
+      "class": "int",
+      "optional": true,
+      "choices": [ 10000, 32768 ],
+      "default": 10000,
+      "help": "K-best reference haplotypes are chosen for the phasing step prior to imputation."
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "imputed_file",
+      "class": "file",
+      "patterns": [
+        "*.vcf.gz", "*.bcf"
+      ],
+      "help": "Contains the imputation result in .vcf.gz or .bcf format, depending on the target input."
+    },
+    {
+      "name": "phasing_confidences",
+      "class": "file",
+      "patterns": [
+        "*.confidences"
+      ],
+      "help": "Averaged phasing confidences per sample from the phasing step."
+    },
+    {
+      "name": "varinfo",
+      "class": "file",
+      "patterns": [
+        "*.varinfo"
+      ],
+      "help": "Information on all variants from the reference whether it was included or excluded, and why."
+    },
+    {
+      "name": "log",
+      "class": "file",
+      "patterns": [
+        "*.log"
+      ],
+      "help": "Logfile containing terminal output including warnings and errors."
+    }
+  ],
+  "runSpec": {
+    "timeoutPolicy": {
+      "*": {
+        "days": 7
+      }
+    },
+    "interpreter": "bash",
+    "file": "src/ikmb-eagleimp.sh",
+    "distribution": "Ubuntu",
+    "release": "24.04",
+    "version": "0"
+  },
+  "access": {
+    "project": "CONTRIBUTE"
+  }
+}
