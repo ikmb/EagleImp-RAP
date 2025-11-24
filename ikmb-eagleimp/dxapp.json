@@ -3,7 +3,7 @@
   "title": "IKMB-EagleImp",
   "summary": "EagleImp genotype imputation on the UKB RAP (dnanexus).",
   "dxapi": "1.0.0",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "inputSpec": [
     {
       "name": "target",
@@ -71,6 +71,13 @@
       "choices": [ 10000, 32768 ],
       "default": 10000,
       "help": "K-best reference haplotypes are chosen for the phasing step prior to imputation."
+    },
+    {
+      "name": "maxChunkMemory",
+      "class": "int",
+      "optional": true,
+      "default": 0,
+      "help": "Max memory (in GiB) used for chunks. 0 = auto (85% of free RAM), any other value overrides the automatic setting. Be careful, the VM may crash if the setting is too high."
     }
   ],
   "outputSpec": [

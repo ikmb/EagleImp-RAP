@@ -43,10 +43,17 @@ main() {
   echo "build: '$build'"
   echo "allowRefAltSwap: '$allowRefAltSwap'"
   echo "allowStrandFlip: '$allowStrandFlip'"
-  echo "imputeR2filter: '$imputeR2filter'"
-  echo "imputeMAFfilter: '$imputeMAFfilter'"
+  echo "imputeR2filter: $imputeR2filter"
+  echo "imputeMAFfilter: $imputeMAFfilter"
   echo "imputeInfo: '$imputeInfo'"
-  echo "K: '$K'"
+  echo "K: $K"
+  echo -n "maxChunkMemory: "
+  if (( $maxChunkMemory <= 0 )); then
+    maxChunkMemory=0
+    echo "auto"
+  else
+    echo "$maxChunkMemory GiB"
+  fi
 
   # Download target file into VM.
   # To recover the original filename, the output of "dx describe
@@ -161,6 +168,16 @@ main() {
     fi
     echo "yes"
 
+    # take 85% of the available RAM for imputation chunks (and convert to GiB) (auto setting)
+    mem="$(( $mem * 85 / 100 / 1024 / 1024 ))"
+    if (( $mem < $maxChunkMemory )); then
+      echo "WARNING: Your individual setting for maxChunkMemory may exceed the VM's capabilities which could likely result in a system crash!"
+    fi
+    # take over individual setting if applicable
+    if (( $maxChunkMemory > 0 )); then
+      mem=$maxChunkMemory
+    fi
+
     # check if filter values are valid
     echo
     echo -n "Check if filter values are valid... "
@@ -236,9 +253,6 @@ main() {
 
     # strip file path from downloaded file as it is located directly in the home folder now
     genmap="${genmap##*/}"
-
-    # take 85% of the available RAM for imputation chunks (and convert to GiB)
-    mem="$(( $mem * 85 / 100 / 1024 / 1024 ))"
 
     # start timestamp for file processing
     procstart=$(date +%s)
