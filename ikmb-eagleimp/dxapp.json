@@ -3,7 +3,7 @@
   "title": "IKMB-EagleImp",
   "summary": "EagleImp genotype imputation on the UKB RAP (dnanexus).",
   "dxapi": "1.0.0",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "inputSpec": [
     {
       "name": "target",
@@ -15,13 +15,6 @@
       "help": "The target file to be imputed. The output file format will be the same as the input."
     },
     {
-      "name": "reference",
-      "class": "string",
-      "optional": false,
-      "choices": [ "UKBcomplete", "UKBmaf", "1000G" ],
-      "help": "UKBcomplete: complete panel with variants with at least MAC=4; UKBmaf: complete panel filtered by MAF=0.0001; 1000G: 1000 Genomes reference panel."
-    },
-    {
       "name": "build",
       "class": "string",
       "optional": false,
@@ -29,18 +22,19 @@
       "help": "The genome build of the target file. Used to select the correct reference as imputation can only be conducted with target and reference in the same genome build."
     },
     {
-      "name": "allowRefAltSwap",
-      "class": "boolean",
-      "optional": true,
-      "default": true,
-      "help": "Allow target and reference variants to match if their reference and alternative alleles are swapped."
+      "name": "reference",
+      "class": "string",
+      "optional": false,
+      "choices": [ "UKBcomplete", "UKBmaf", "1000G" ],
+      "help": "UKBcomplete: complete panel with variants with at least MAC=4; UKBmaf: complete panel filtered by MAF=0.0001; 1000G: 1000 Genomes reference panel."
     },
     {
-      "name": "allowStrandFlip",
-      "class": "boolean",
+      "name": "imputeInfo",
+      "class": "string",
       "optional": true,
-      "default": false,
-      "help": "Allow target and reference variants to match if their reference and alternative alleles are strand flipped."
+      "choices": [ "a", "g", "p", "ag", "ap", "gp", "agp" ],
+      "default": "a",
+      "help": "Choose which probability information should accompany the hard called genotypes in the output:\na: allele dosages\ng: genotype dosages\np: genotype probabilities\nCan be arbitrarily combined."
     },
     {
       "name": "imputeR2filter",
@@ -57,12 +51,18 @@
       "help": "Output contains only variants with a minor allele frequency greater or equal to this filter value."
     },
     {
-      "name": "imputeInfo",
-      "class": "string",
+      "name": "allowRefAltSwap",
+      "class": "boolean",
       "optional": true,
-      "choices": [ "a", "g", "p", "ag", "ap", "gp", "agp" ],
-      "default": "a",
-      "help": "Choose which probability information should accompany the hard called genotypes in the output:\na: allele dosages\ng: genotype dosages\np: genotype probabilities\nCan be arbitrarily combined."
+      "default": true,
+      "help": "Allow target and reference variants to match if their reference and alternative alleles are swapped."
+    },
+    {
+      "name": "allowStrandFlip",
+      "class": "boolean",
+      "optional": true,
+      "default": false,
+      "help": "Allow target and reference variants to match if their reference and alternative alleles are strand flipped."
     },
     {
       "name": "K",
