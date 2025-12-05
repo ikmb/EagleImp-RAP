@@ -39,13 +39,14 @@ main() {
   gmbase_hg38="/1000G/genetic_maps/hg38/genetic_map_hg38_chr##.txt"
 
   echo "target: '$target'"
-  echo "reference: '$reference'"
   echo "build: '$build'"
-  echo "allowRefAltSwap: '$allowRefAltSwap'"
-  echo "allowStrandFlip: '$allowStrandFlip'"
+  echo "reference: '$reference'"
+  echo "skipPhasing: '$skipPhasing'"
+  echo "imputeInfo: '$imputeInfo'"
   echo "imputeR2filter: $imputeR2filter"
   echo "imputeMAFfilter: $imputeMAFfilter"
-  echo "imputeInfo: '$imputeInfo'"
+  echo "allowRefAltSwap: '$allowRefAltSwap'"
+  echo "allowStrandFlip: '$allowStrandFlip'"
   echo "K: $K"
   echo -n "maxChunkMemory: "
   if (( $maxChunkMemory <= 0 )); then
@@ -87,29 +88,36 @@ main() {
     ext=".vcf.gz"
   fi
 
-  # parse imputation options
-  unset allrefalt
-  if [[ $allowRefAltSwap == true ]]; then
-    allrefalt="--allowRefAltSwap"
-  fi
+  # parse imputation options:
 
-  unset allstrandflip
-  if [[ $allowStrandFlip == true ]]; then
-    allstrandflip="--allowStrandFlip"
+  # first option
+  eagleimpopts="--imputeInfo $imputeInfo"
+
+  if [[ $skipPhasing == true ]]; then
+    eagleimpopts="$eagleimpopts --skipPhasing"
   fi
 
   unset r2filter
   if (( $(echo "$imputeR2filter > 0" | bc -l) )); then
-    r2filter="--imputeR2filter $imputeR2filter"
+    eagleimpopts="$eagleimpopts --imputeR2filter $imputeR2filter"
+    r2filter=1
   fi
 
   unset maffilter
   if (( $(echo "$imputeMAFfilter > 0" | bc -l) )); then
-    maffilter="--imputeMAFfilter $imputeMAFfilter"
+    eagleimpopts="$eagleimpopts --imputeMAFfilter $imputeMAFfilter"
+    maffilter=1
   fi
 
-  impinfo="--imputeInfo $imputeInfo"
-  k="--K $K"
+  if [[ $allowRefAltSwap == true ]]; then
+    eagleimpopts="$eagleimpopts --allowRefAltSwap"
+  fi
+
+  if [[ $allowStrandFlip == true ]]; then
+    eagleimpopts="$eagleimpopts --allowStrandFlip"
+  fi
+
+  eagleimpopts="$eagleimpopts --K $K"
 
   # names of final result files
   resultadd=."$reference"
@@ -488,7 +496,7 @@ process_file() {
   echo "Indexing time: $idxtime seconds"
 
   # EagleImp command
-  cmd="eagleimp --target $tgt --ref $ref --geneticMap $genmap -O$fmt --maxChunkMemory $mem $allrefalt $allstrandflip $r2filter $maffilter $impinfo $k"
+  cmd="eagleimp --target $tgt --ref $ref --geneticMap $genmap -O$fmt --maxChunkMemory $mem $eagleimpopts"
 
   # start timestamp for eagleimp
   eagleimpstart=$(date +%s)

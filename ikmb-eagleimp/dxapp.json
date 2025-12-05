@@ -3,7 +3,7 @@
   "title": "IKMB-EagleImp",
   "summary": "EagleImp genotype imputation on the UKB RAP (dnanexus).",
   "dxapi": "1.0.0",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "inputSpec": [
     {
       "name": "target",
@@ -27,6 +27,13 @@
       "optional": false,
       "choices": [ "UKBcomplete", "UKBmaf", "1000G" ],
       "help": "UKBcomplete: complete panel with variants with at least MAC=4; UKBmaf: complete panel filtered by MAF=0.0001; 1000G: 1000 Genomes reference panel."
+    },
+    {
+      "name": "skipPhasing",
+      "class": "boolean",
+      "optional": true,
+      "default": false,
+      "help": "Skip phasing step (input is already phased)."
     },
     {
       "name": "imputeInfo",
