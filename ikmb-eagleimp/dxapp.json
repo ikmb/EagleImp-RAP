@@ -3,7 +3,7 @@
   "title": "IKMB-EagleImp",
   "summary": "EagleImp genotype imputation on the UKB RAP (dnanexus).",
   "dxapi": "1.0.0",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "inputSpec": [
     {
       "name": "target",
@@ -36,6 +36,13 @@
       "help": "Skip phasing step (input is already phased)."
     },
     {
+      "name": "skipImputation",
+      "class": "boolean",
+      "optional": true,
+      "default": false,
+      "help": "Skip imputation step (do phasing only)."
+    },
+    {
       "name": "imputeInfo",
       "class": "string",
       "optional": true,
@@ -56,6 +63,20 @@
       "optional": true,
       "default": 0.0,
       "help": "Output contains only variants with a minor allele frequency greater or equal to this filter value."
+    },
+    {
+      "name": "outputPhasedFile",
+      "class": "boolean",
+      "optional": true,
+      "default": false,
+      "help": "Generates an additional output file that contains only the phased input."
+    },
+    {
+      "name": "outputUnphased",
+      "class": "boolean",
+      "optional": true,
+      "default": false,
+      "help": "Sites excluded from phasing are included in the phased output (if enabled)."
     },
     {
       "name": "allowRefAltSwap",
@@ -91,18 +112,29 @@
     {
       "name": "imputed_file",
       "class": "file",
+      "optional": true,
       "patterns": [
         "*.vcf.gz", "*.bcf"
       ],
-      "help": "Contains the imputation result in .vcf.gz or .bcf format, depending on the target input."
+      "help": "Contains the imputation result in .vcf.gz or .bcf format, depending on the target input format. Omitted, when skipImputation=TRUE."
+    },
+    {
+      "name": "phased_file",
+      "class": "file",
+      "optional": true,
+      "patterns": [
+        "*.vcf.gz", "*.bcf"
+      ],
+      "help": "Contains the phasing result of the input file in .vcf.gz or .bcf format, depending on the target input format. Omitted, when outputPhasedFile=FALSE."
     },
     {
       "name": "phasing_confidences",
       "class": "file",
+      "optional": true,
       "patterns": [
         "*.confidences"
       ],
-      "help": "Averaged phasing confidences per sample from the phasing step."
+      "help": "Averaged phasing confidences per sample from the phasing step. Omitted when skipPhasing=TRUE."
     },
     {
       "name": "varinfo",

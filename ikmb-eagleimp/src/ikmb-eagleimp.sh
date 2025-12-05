@@ -42,9 +42,12 @@ main() {
   echo "build: '$build'"
   echo "reference: '$reference'"
   echo "skipPhasing: '$skipPhasing'"
+  echo "skipImputation: '$skipImputation'"
   echo "imputeInfo: '$imputeInfo'"
   echo "imputeR2filter: $imputeR2filter"
   echo "imputeMAFfilter: $imputeMAFfilter"
+  echo "outputPhasedFile: '$outputPhasedFile'"
+  echo "outputUnphased: '$outputUnphased'"
   echo "allowRefAltSwap: '$allowRefAltSwap'"
   echo "allowStrandFlip: '$allowStrandFlip'"
   echo "K: $K"
@@ -89,24 +92,49 @@ main() {
   fi
 
   # parse imputation options:
+  unset eagleimpopts
 
-  # first option
-  eagleimpopts="--imputeInfo $imputeInfo"
+  if [[ $skipPhasing == true && $skipImputation == true ]]; then
+    dx-jobutil-report-error "ERROR: skipImputation and skipPhasing cannot be set together!"
+    exit 1
+  fi
 
   if [[ $skipPhasing == true ]]; then
     eagleimpopts="$eagleimpopts --skipPhasing"
   fi
 
-  unset r2filter
-  if (( $(echo "$imputeR2filter > 0" | bc -l) )); then
-    eagleimpopts="$eagleimpopts --imputeR2filter $imputeR2filter"
-    r2filter=1
+  if [[ $skipImputation == true ]]; then
+    eagleimpopts="$eagleimpopts --skipImputation"
+    # override outputPhasedFile option as the phasing output will be required when imputation is skipped
+    outputPhasedFile=true
   fi
 
+  unset r2filter
   unset maffilter
-  if (( $(echo "$imputeMAFfilter > 0" | bc -l) )); then
-    eagleimpopts="$eagleimpopts --imputeMAFfilter $imputeMAFfilter"
-    maffilter=1
+  if [[ $skipImputation != true ]]; then # do imputation
+    eagleimpopts="$eagleimpopts --imputeInfo $imputeInfo"
+
+    if (( $(echo "$imputeR2filter > 0" | bc -l) )); then
+      eagleimpopts="$eagleimpopts --imputeR2filter $imputeR2filter"
+      r2filter=1
+    fi
+
+    if (( $(echo "$imputeMAFfilter > 0" | bc -l) )); then
+      eagleimpopts="$eagleimpopts --imputeMAFfilter $imputeMAFfilter"
+      maffilter=1
+    fi
+  fi
+
+  if [[ $skipPhasing != true ]]; then # do phasing
+    eagleimpopts="$eagleimpopts --K $K"
+
+    if [[ $outputPhasedFile == true ]]; then
+      eagleimpopts="$eagleimpopts --outputPhasedFile"
+    fi
+
+    if [[ $outputPhasedFile == true && $outputUnphased == true ]]; then # available only in combination
+      eagleimpopts="$eagleimpopts --outputUnphased"
+    fi
   fi
 
   if [[ $allowRefAltSwap == true ]]; then
@@ -116,8 +144,6 @@ main() {
   if [[ $allowStrandFlip == true ]]; then
     eagleimpopts="$eagleimpopts --allowStrandFlip"
   fi
-
-  eagleimpopts="$eagleimpopts --K $K"
 
   # names of final result files
   resultadd=."$reference"
@@ -129,6 +155,7 @@ main() {
   fi
   tgtbase="${tgt%$ext}"
   imputed="$tgtbase$resultadd".imputed$ext
+  phased="$tgtbase$resultadd".phased$ext
   confidences="$tgtbase$resultadd".phased.confidences
   varinfo="$tgtbase$resultadd".varinfo
   logfile="$tgtbase$resultadd".log
@@ -275,9 +302,20 @@ main() {
       process_file "$tgt" "$ref"
 
       # rename output files
-      mv "${tgt%$ext}".imputed$ext "$imputed"
-      mv "${tgt%$ext}".phased.confidences "$confidences"
-      mv "${tgt%$ext}".varinfo "$varinfo"
+      imp="${tgt%$ext}".imputed$ext
+      if [[ -e $imp ]]; then
+        mv "$imp" "$imputed"
+      fi
+      phs="${tgt%$ext}".phased$ext
+      if [[ -e $phs ]]; then
+        mv "$phs" "$phased"
+      fi
+      conf="${tgt%$ext}".phased.confidences
+      if [[ -e $conf ]]; then
+        mv "$conf" "$confidences"
+      fi
+      var="${tgt%$ext}".varinfo
+      mv "$var" "$varinfo"
 
     else
       # split X chromosome in PAR/nonPAR regions and process parts separately with final merging
@@ -343,25 +381,44 @@ main() {
       imp_par1="${tgt_par1/PAR1/PAR1.imputed}"
       imp_nonpar="${tgt_nonpar/nonPAR/nonPAR.imputed}"
       imp_par2="${tgt_par2/PAR2/PAR2.imputed}"
-      files=""
-      if [[ -f $imp_par1 ]]; then
-        files="$files $imp_par1"
+      imp_files=""
+      if [[ -e $imp_par1 ]]; then
+        imp_files="$imp_files $imp_par1"
       fi
-      if [[ -f $imp_nonpar ]]; then
-        files="$files $imp_nonpar"
+      if [[ -e $imp_nonpar ]]; then
+        imp_files="$imp_files $imp_nonpar"
       fi
-      if [[ -f $imp_par2 ]]; then
-        files="$files $imp_par2"
+      if [[ -e $imp_par2 ]]; then
+        imp_files="$imp_files $imp_par2"
       fi
-      # assuming at least one file, otherwise there would have been an error beforehand
+      # phased
+      phs_par1="${tgt_par1/PAR1/PAR1.phased}"
+      phs_nonpar="${tgt_nonpar/nonPAR/nonPAR.phased}"
+      phs_par2="${tgt_par2/PAR2/PAR2.phased}"
+      phs_files=""
+      if [[ -e $phs_par1 ]]; then
+        phs_files="$phs_files $phs_par1"
+      fi
+      if [[ -e $phs_nonpar ]]; then
+        phs_files="$phs_files $phs_nonpar"
+      fi
+      if [[ -e $phs_par2 ]]; then
+        phs_files="$phs_files $phs_par2"
+      fi
       if ! {
-        bcftools concat $files -n -o "$imputed"
+        if [[ -n "$imp_files" ]]; then
+          bcftools concat $imp_files -n -o "$imputed"
+        fi
+        if [[ -n "$phs_files" ]]; then
+          bcftools concat $phs_files -n -o "$phased"
+        fi
       }; then
         dx-jobutil-report-error "ERROR: Concatenating PAR/nonPAR regions failed."
         exit 1
       fi
 
       # confidences
+      shopt -s nullglob # don't throw an error if files referenced with '*' don't exist
       for conf in *PAR1.phased.confidences *nonPAR.phased.confidences *PAR2.phased.confidences; do
         echo "$conf:" >> "$confidences"
         cat "$conf" >> "$confidences"
@@ -378,7 +435,7 @@ main() {
           tail -n +2 "$vinfo" >> "$varinfo"
         fi
       done
-    fi
+    fi # end if splitx...
 
     # end timestamp for file processing
     procend=$(date +%s)
@@ -390,16 +447,23 @@ main() {
     echo
     echo -n "Uploading result files..."
 
-    # upload result files from the VM to the parent project
-    imputed_file=$(dx upload "$imputed" --brief)
-    phasing_confidences=$(dx upload "$confidences" --brief)
-    varinfo=$(dx upload "$varinfo" --brief)
-
+    # Upload result files from the VM to the parent project.
     # The utility dx-jobutil-add-output is used to format and
     # add output variables to the job's output as appropriate for the output
     # class.
-    dx-jobutil-add-output imputed_file "$imputed_file" --class=file
-    dx-jobutil-add-output phasing_confidences "$phasing_confidences" --class=file
+    if [[ -e $imputed ]]; then
+      imputed_file=$(dx upload "$imputed" --brief)
+      dx-jobutil-add-output imputed_file "$imputed_file" --class=file
+    fi
+    if [[ -e $phased ]]; then
+      phased_file=$(dx upload "$phased" --brief)
+      dx-jobutil-add-output phased_file "$phased_file" --class=file
+    fi
+    if [[ -e $confidences ]]; then
+      phasing_confidences=$(dx upload "$confidences" --brief)
+      dx-jobutil-add-output phasing_confidences "$phasing_confidences" --class=file
+    fi
+    varinfo=$(dx upload "$varinfo" --brief)
     dx-jobutil-add-output varinfo "$varinfo" --class=file
 
     # end timestamp for upload
