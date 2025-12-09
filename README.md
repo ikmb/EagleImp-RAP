@@ -1,6 +1,6 @@
 # EagleImp-RAP
 
-*EagleImp-RAP* is implemented as a DNAnexus applet to run the [EagleImp]{https://github.com/ikmb/eagleimp} software on the UK Biobank Research Access Platform (UKB-RAP) in order to enable haplotype phasing and genotype imputation with UK Biobank haplotype reference panels.
+*EagleImp-RAP* is implemented as a DNAnexus applet to run the [EagleImp](https://github.com/ikmb/eagleimp) software on the UK Biobank Research Access Platform (UKB-RAP) in order to enable haplotype phasing and genotype imputation with UK Biobank haplotype reference panels.
 
 EagleImp-RAP was developed following the DNAnexus developer guidelines at https://documentation.dnanexus.com/developer/apps/intro-to-building-apps.
 
@@ -17,7 +17,7 @@ At the current stage *EagleImp-RAP* is not yet available as ready-to-use DNAnexu
 
 #### Requirements:
 
-- **dxtools**: See [Command Line Quickstart]{https://documentation.dnanexus.com/getting-started/cli-quickstart} from the DNAnexus documentation how to set up the command line interface for the UKB-RAP on your system.
+- **dxtools**: See [Command Line Quickstart](https://documentation.dnanexus.com/getting-started/cli-quickstart) from the DNAnexus documentation how to set up the command line interface for the UKB-RAP on your system.
 
 - **UKB reference files**: For now, the reference panel files in *.qref* format must be installed in a local DNAnexus project under `your_project:/qrefs/UKB/`.
 
@@ -45,11 +45,11 @@ Now, the applet is ready to use on the DNAnexus.
 
 *EagleIMP-RAP* provides the following user options. The first three are mandatory:
 
-- `target`: The target file to be phased/imputed. Can be either in `.bcf` or `.vcf.gz` format. The same input file conventions as for [EagleImp]{https://github.com/ikmb/eagleimp} apply, i.e. the file must not contain data for more than one chromosome and the file name must start with the chromosome number, followed by a dot. A preceding 'chr' is allowed.
+- `target`: The target file to be phased/imputed. Can be either in `.bcf` or `.vcf.gz` format. The same input file conventions as for [EagleImp](https://github.com/ikmb/eagleimp) apply, i.e. the file must not contain data for more than one chromosome and the file name must start with the chromosome number, followed by a dot. A preceding 'chr' is allowed.
 - `build`: The genome build of your input file. Either `hg19` or `hg38`.
 - `reference`: One of the supported reference panels: `UKBcomplete`, `UKBmaf` or `1000G`.
 
-The following options are optional and are exactly as in [EagleImp]{https://github.com/ikmb/eagleimp}:
+The following options are optional and are exactly as in [EagleImp](https://github.com/ikmb/eagleimp):
 
 - `skipPhasing`: Skip phasing step (input is already phased). default = `false`
 - `skipImputation`: Skip imputation step (do phasing only). default = `false`
@@ -78,7 +78,7 @@ The output files are:
 
 **Note**: The following examples expect the applet to be installed in the root directory of your active project. If not, please use the correct path to your applet when calling `dx run`.
 
-**Note**: The same input file conventions as for [EagleImp]{https://github.com/ikmb/eagleimp} apply, i.e. the file must not contain data for more than one chromosome and the file name must start with the chromosome number, followed by a dot. A preceding 'chr' is allowed.
+**Note**: The same input file conventions as for [EagleImp](https://github.com/ikmb/eagleimp) apply, i.e. the file must not contain data for more than one chromosome and the file name must start with the chromosome number, followed by a dot. A preceding 'chr' is allowed.
 
 #### Single file:
 
