@@ -1,6 +1,6 @@
 {
   "name": "ikmb-eagleimp",
-  "title": "IKMB-EagleImp",
+  "title": "EagleImp-RAP (ikmb-eagleimp)",
   "summary": "EagleImp genotype imputation on the UKB RAP (dnanexus).",
   "dxapi": "1.0.0",
   "version": "0.2.5",
