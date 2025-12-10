@@ -11,13 +11,15 @@ This applet allows phasing and imputation with reference panels from UK Biobank 
 
 EagleImp-RAP can only be executed under the following conditions:
 
-- You must be an approved researcher on an active UK Biobank project.
+- You are an approved researcher on an active UK Biobank project.
 
-- You must have registered for the DNAnexus to get access to the UKB Research Analysis Platform (UKB-RAP).
+- You have access to the UKB Research Analysis Platform (UKB-RAP) via DNAnexus and are registered as an analyst for that project in DNAnexus.
 
-- You must have the explicit permission from UK Biobank to use the UKB imputation reference panels, in particular you must have access to the the UKB reference panel files (.qref) within your own UKB-RAP project space. (The exact mechanism - copy, link, or UKB-managed shared location - depends on UKB's policy.)
+- You have permission from UK Biobank to use the UKB imputation reference panels.
 
-Note that without meeting above conditions, i.e. without access to the UKB-RAP and the reference panels, phasing and imputation using EagleImp-RAP is not possible.
+- You have access to the the UKB reference panel files (.qref) within your own UKB-RAP project space. (The exact mechanism - copy, link, or UKB-managed shared location - depends on UKB's policy.)
+
+Users without UKB-RAP access or without permission to use the UKB reference panels cannot run EagleImp-RAP, because the required reference data are not accessible.
 
 
 #### Required tools:
@@ -31,7 +33,7 @@ At the current stage *EagleImp-RAP* is not yet available as ready-to-use DNAnexu
 
 1. Navigate to the repository folder on your local machine:
 ```
-cd  <path_to_repo>
+cd <path_to_repo>
 ```
 
 2. Navigate to the root folder (or an alternative folder) in the DNAnexus where you want to install the applet.
