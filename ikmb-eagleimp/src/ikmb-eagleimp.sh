@@ -38,6 +38,15 @@ main() {
   gmbase_hg19="/1000G/genetic_maps/hg19/genetic_map_hg19_chr##.txt"
   gmbase_hg38="/1000G/genetic_maps/hg38/genetic_map_hg38_chr##.txt"
 
+  # sample file:
+  # - either a simple one-column text file with IDs corresponding to the samples in the reference panels
+  # - or a PLINK .fam file (no header, sample IDs still must be in the first (FID) column (mostly FID and IID are the same))
+  # - a BGEN .sample file (two header lines are ignored, sample IDs are taken from the second column)
+  # The sample file is used to mask withdrawn participants from the panel. For this purpose, withdrawals
+  # have either a sample ID starting with "W" followed by digits or a negative sample ID, i.e. starting
+  # with "-" followed by digits.
+  samplefile="${refproject}/qrefs/UKB/samples_w139525"
+
   echo "target: '$target'"
   echo "build: '$build'"
   echo "reference: '$reference'"
@@ -277,6 +286,17 @@ main() {
       echo "yes"
     fi
 
+    echo -n "Check if sample file $samplefile is available... "
+    if ! {
+      dx describe "$samplefile" >/dev/null 2>&1
+    }; then
+      echo "no"
+      dx-jobutil-report-error "ERROR: Ensure that the sample file is available at the correct location in your project: $samplefile"
+      exit 1
+    else
+      echo "yes"
+    fi
+
     echo -n "Downloading genetic map... "
     if ! {
       dx download --no-progress $genmap
@@ -286,8 +306,18 @@ main() {
     fi
     echo "done"
 
-    # strip file path from downloaded file as it is located directly in the home folder now
+    echo -n "Downloading sample file... "
+    if ! {
+      dx download --no-progress $samplefile
+    }; then
+      dx-jobutil-report-error "ERROR: Failed to download sample file $samplefile"
+      exit 1
+    fi
+    echo "done"
+
+    # strip file path from downloaded files as they are located directly in the home folder now
     genmap="${genmap##*/}"
+    samplefile="${samplefile##*/}"
 
     # start timestamp for file processing
     procstart=$(date +%s)
@@ -560,7 +590,7 @@ process_file() {
   echo "Indexing time: $idxtime seconds"
 
   # EagleImp command
-  cmd="eagleimp --target $tgt --ref $ref --geneticMap $genmap -O$fmt --maxChunkMemory $mem $eagleimpopts"
+  cmd="eagleimp --target $tgt --ref $ref --geneticMap $genmap --excludeWithdrawals $samplefile -O$fmt --maxChunkMemory $mem $eagleimpopts"
 
   # start timestamp for eagleimp
   eagleimpstart=$(date +%s)

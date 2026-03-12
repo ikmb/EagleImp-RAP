@@ -17,7 +17,9 @@ EagleImp-RAP can only be executed under the following conditions:
 
 - You have permission from UK Biobank to use the UKB imputation reference panels.
 
-- You have access to the the UKB reference panel files (.qref) within your own UKB-RAP project space. (The exact mechanism - copy, link, or UKB-managed shared location - depends on UKB's policy.)
+- You have access to the the UKB reference panel files (.qref) within your own UKB-RAP project space. (The exact mechanism - copy, link, or UKB-managed shared location - depends on UKB's policy.) This includes a genetic map for each genome build (hg19 and hg38) and a sample file containing sample IDs corresponding to the panel. Please adjust the paths in [ikmb-eagleimp.sh](ikmb-eagleimp/src/ikmb-eagleimp.sh) accordingly.
+
+    **NOTE:** It is planned to move the reference panel files (including genetic maps and sample file) to a common place within UKB-RAP such that they do not need to be stored in individual project space.
 
 Users without UKB-RAP access or without permission to use the UKB reference panels cannot run EagleImp-RAP, because the required reference data are not accessible.
 
